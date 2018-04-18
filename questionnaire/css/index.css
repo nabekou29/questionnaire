@@ -1,0 +1,9 @@
+.answer {
+  height: 150px;
+  display: flex;
+  align-items: center;
+}
+
+.answer:hover {
+  border: solid 1px #99ffff;
+}
