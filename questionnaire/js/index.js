@@ -23,6 +23,7 @@ $(function () {
   $("button#submit-button").one('click', function () {
     $('button#submit-button').removeClass('btn-primary');
     $('button#submit-button').addClass('btn-default');
+    $('button#submit-button').attr('type', 'button');
     $('button#submit-button').attr('readonly', true);
 
     let url = $(this).data('action');
