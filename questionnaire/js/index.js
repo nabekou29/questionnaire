@@ -3,7 +3,7 @@ $(function () {
 
   $("input[name='name']").val($.cookie("name"));
 
-  $("button[type='button']").on('click', function () {
+  $("button[type='button']").one('click', function () {
     // 名前をクッキーに保存
     let name = $("input[name='name']").val();
     $.cookie("name", name);
@@ -12,7 +12,7 @@ $(function () {
     indexNo += 1;
   });
 
-  $('img').on('click', function () {
+  $('img').one('click', function () {
     let value = $(this).data("value");
     $(`div[data-index='${indexNo}'] input`).val(value);
 
@@ -20,7 +20,7 @@ $(function () {
     indexNo += 1;
   });
 
-  $("button#submit-button").on('click', function () {
+  $("button#submit-button").one('click', function () {
     $('button#submit-button').removeClass('btn-primary');
     $('button#submit-button').addClass('btn-default');
     $('button#submit-button').attr('readonly', true);
