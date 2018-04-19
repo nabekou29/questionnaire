@@ -5,5 +5,5 @@
 }
 
 .answer:hover {
-  border: solid 1px #99ffff;
+  outline: 6px solid skyblue;
 }
