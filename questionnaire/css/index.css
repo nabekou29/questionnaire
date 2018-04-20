@@ -20,3 +20,7 @@ body {
   /*上下中央揃え*/
   height: 100%;
 }
+
+div#submit {
+  text-align: right;
+}
