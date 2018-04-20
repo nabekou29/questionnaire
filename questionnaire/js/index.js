@@ -21,31 +21,47 @@ $(function () {
   });
 
   $("button#submit-button").one('click', function () {
-    $('button#submit-button').removeClass('btn-primary');
-    $('button#submit-button').addClass('btn-default');
-    $('button#submit-button').attr('type', 'button');
-    $('button#submit-button').attr('readonly', true);
+    showNextForm(indexNo);
+    indexNo += 1;
 
     let url = $(this).data('action');
-    let data = $('form').serializeArray();
 
     $.ajax({
       url: url,
       type: 'post',
       dataType: 'json',
-      data: JSON.stringify(data)
+      data: createJson()
     }).done((data) => {
       console.log(data);
     }).fail((data) => {
       console.log('error');
+      console.log(data);
     });
 
     return false;
   });
 })
 
+/**
+ * 次のフォームに切り替える
+ * @param {number} indexNo フォーム番号
+ */
 function showNextForm(indexNo) {
   $(`div[data-index='${indexNo}']`).fadeOut("slow", function () {
     $(`div[data-index='${indexNo + 1}']`).fadeIn("slow");
   });
+}
+
+function createJson() {
+  let data = {
+    name: $("[name='name']").val(),
+    q1: $("[name='q1']").val(),
+    q2: $("[name='q2']").val(),
+    q3: $("[name='q3']").val(),
+    q4: $("[name='q4']").val(),
+    q5: $("[name='q5']").val(),
+    q6: $("[name='q6']").val()
+  };
+
+  return JSON.stringify(data);
 }
