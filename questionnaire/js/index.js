@@ -3,7 +3,7 @@ $(function () {
 
   $("input[name='name']").val($.cookie("name"));
 
-  $("button[type='button']").one('click', function () {
+  $("button.start").one('click', function () {
     // 名前をクッキーに保存
     let name = $("input[name='name']").val();
     $.cookie("name", name);
