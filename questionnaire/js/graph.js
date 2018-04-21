@@ -1,65 +1,65 @@
 const DATASETS_FORMAT = {
     q1 : {
         label: "私生活",
-        fillColor: "rgba(209, 218, 36, 0.2)",
-        strokeColor: "rgba(209, 218, 36, 1)",
-        pointColor: "rgba(209, 218, 36, 1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(209, 218, 36, 1)",
+        borderColor: "rgba(249, 71, 66, 1)",
+        backgroundColor: "rgba(249, 71, 66, 0.2)",
+        spanGaps: true,
         data: [],
       },
     q2 : {
         label: "学校生活",
-        fillColor: "rgba(65, 147, 255, 0.2)",
-        strokeColor: "rgba(65, 147, 255, 1)",
-        pointColor: "rgba(65, 147, 255, 1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(65, 147, 255, 1)",
+        borderColor: "rgba(52, 151, 254, 1)",
+        backgroundColor: "rgba(52, 151, 254, 0.2)",
+        spanGaps: true,
         data: [],
       },
     q3 : {
         label: "人間関係",
-        fillColor: "rgba(36, 218, 54, 0.2)",
-        strokeColor: "rgba(36, 218, 54, 1)",
-        pointColor: "rgba(36, 218, 54, 1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(36, 218, 54, 1)",
+        borderColor: "rgba(245, 249, 66, 1)",
+        backgroundColor: "rgba(245, 249, 66, 0.2)",
+        spanGaps: true,
         data: [],
       },
     q4 : {
         label: "体調",
-        fillColor: "rgba(218, 97, 65, 0.2)",
-        strokeColor: "rgba(218, 97, 65, 1)",
-        pointColor: "rgba(218, 97, 65, 1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(218, 97, 65, 1)",
+        borderColor: "rgba(66, 148, 67, 1)",
+        backgroundColor: "rgba(66, 148, 67, 0.2)",
+        spanGaps: true,
         data: [],
       },
     q5 : {
         label: "プライズ",
-        fillColor: "rgba(214, 142, 3, 0.2)",
-        strokeColor: "rgba(214, 142, 3, 1)",
-        pointColor: "rgba(214, 142, 3, 1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(214, 142, 3, 1)",
+        borderColor: "rgba(249, 176, 66, 1)",
+        backgroundColor: "rgba(249, 176, 66, 0.2)",
+        spanGaps: true,
         data: [],
       },
   };
 
 $(function() {
-  createGraph("渡邉", new Date(2018, 3, 20, 22, 30), new Date(2018, 3, 22, 22, 30));
+  createGraph("渡邉", new Date(2018, 3, 20), new Date(2018, 3, 23));
 });
 
 function createGraph(name, from, to) {
-  let data = createGraphData(name, from, to);
-  let ctx = document.getElementById("lineChart").getContext("2d");
-  let options = {};
-  let lineChart = new Chart(ctx).Line(data, options);
+  var ctx = document.getElementById("lineChart").getContext('2d');
+  var lineChart = new Chart(ctx, {
+   type: 'line',
+   data: createGraphData(name, from, to),
+   options: {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                min: 1,
+                max: 5
+              }
+            }
+          ]
+        }
+      }
+ });
+
+  $("#title").html(`${name}さんの${dateToString(from)} 〜 ${dateToString(to)}の心情`);
 }
 
 function createGraphData(name, from, to) {
@@ -67,14 +67,26 @@ function createGraphData(name, from, to) {
   let labels = [];
   let dataSetsTmp = Object.assign({}, DATASETS_FORMAT);
 
+  let dataIndex = 0;
   let targetDate = new Date(from.getTime());
-  for (let i = 0; targetDate.getTime() <= to.getTime(); targetDate.setDate(targetDate.getDate() + 1), i++) {
+  while (answers[dataIndex] < to) {
+    dataIndex++;
+  }
+  for (; targetDate.getTime() <= to.getTime(); targetDate.setDate(targetDate.getDate() + 1)) {
     labels.push(`${targetDate.getMonth() + 1}/${targetDate.getDate()}`);
-    dataSetsTmp.q1.data.push(answers[i].q1);
-    dataSetsTmp.q2.data.push(answers[i].q2);
-    dataSetsTmp.q3.data.push(answers[i].q3);
-    dataSetsTmp.q4.data.push(answers[i].q4);
-    dataSetsTmp.q5.data.push(answers[i].q5);
+
+    let answer;
+    if (answers[dataIndex].date.getTime() == targetDate.getTime()) {
+      answer = answers[dataIndex];
+      dataIndex++;
+    } else {
+      answer = {q1: null, q2: null, q3: null, q4: null, q5: null};
+    }
+    dataSetsTmp.q1.data.push(answer.q1);
+    dataSetsTmp.q2.data.push(answer.q2);
+    dataSetsTmp.q3.data.push(answer.q3);
+    dataSetsTmp.q4.data.push(answer.q4);
+    dataSetsTmp.q5.data.push(answer.q5);
   }
 
   let dataSets = [dataSetsTmp.q1, dataSetsTmp.q2, dataSetsTmp.q3, dataSetsTmp.q4, dataSetsTmp.q5];
@@ -87,7 +99,7 @@ function getAnswerByName(name) {
   // date, name, q1, q2, q3, q4, q5, q6
   let data = [];
   data[0] = {
-      date : new Date(2018, 3, 20, 22, 30),
+      date : new Date(2018, 3, 20),
       q1 : 3,
       q2 : 2,
       q3 : 2,
@@ -95,7 +107,7 @@ function getAnswerByName(name) {
       q5 : 5,
     };
   data[1] = {
-      date : new Date(2018, 3, 21, 22, 50),
+      date : new Date(2018, 3, 21),
       q1 : 1,
       q2 : 5,
       q3 : 1,
@@ -103,12 +115,16 @@ function getAnswerByName(name) {
       q5 : 4,
     };
   data[2] = {
-      date : new Date(2018, 3, 22, 22, 50),
+      date : new Date(2018, 3, 23),
       q1 : 2,
       q2 : 5,
-      q3 : 1,
+      q3 : 5,
       q4 : 4,
       q5 : 3,
     };
   return data;
+}
+
+function dateToString(date) {
+  return `${date.getMonth() + 1}/${date.getDate()}`;
 }
