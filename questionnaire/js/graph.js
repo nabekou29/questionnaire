@@ -8,7 +8,7 @@ $(function() {
     namesSelect.appendChild(option);
   });
 
-
+  // 日付のデフォルト値を設定
   let dateFormat = new DateFormat("yyyy-MM-dd");
   let setDate = new Date();
   $("#to").val(dateFormat.format(setDate));
@@ -17,7 +17,7 @@ $(function() {
 
   // グラフ生成のイベント登録
   $("#names, #to, #from").on('change', function() {
-    let name = $(this).val();
+    let name = $("#names").val();
     let from = dateFormat.parse($("#from").val());
     let to = dateFormat.parse($("#to").val());
     if (name) {
@@ -87,28 +87,28 @@ function getAnswersByName(name) {
   // TODO: 作成
   let answers = [];
   answers[0] = {
-      date : new Date(2018, 3, 20),
-      q1 : 3,
-      q2 : 2,
-      q3 : 2,
-      q4 : 4,
-      q5 : 5,
+      date: new Date(2018, 3, 20),
+      q1: 3,
+      q2: 2,
+      q3: 2,
+      q4: 4,
+      q5: 5,
     };
   answers[1] = {
-      date : new Date(2018, 3, 21),
-      q1 : 1,
-      q2 : 5,
-      q3 : 1,
-      q4 : 4,
-      q5 : 4,
+      date: new Date(2018, 3, 21),
+      q1: 1,
+      q2: 5,
+      q3: 1,
+      q4: 4,
+      q5: 4,
     };
   answers[2] = {
-      date : new Date(2018, 3, 23),
-      q1 : 2,
-      q2 : 5,
-      q3 : 5,
-      q4 : 4,
-      q5 : 3,
+      date: new Date(2018, 3, 23),
+      q1: 2,
+      q2: 5,
+      q3: 5,
+      q4: 4,
+      q5: 3,
     };
   return answers;
 }
