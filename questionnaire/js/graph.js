@@ -1,4 +1,7 @@
 $(function() {
+  // chart.jsの設定
+  Chart.defaults.line.spanGaps = true;
+
   // 名前一覧のセレクトボックス生成
   let namesSelect = document.getElementById("names");
   getAllNames().forEach(function(name) {
@@ -38,7 +41,12 @@ function drawGraph(name, from, to) {
     options: {
       scales: {
         yAxes: [{ticks: {min: 1, max: 5}}]
-      }
+      },
+      tooltips: {
+            mode: 'index',
+            axis: 'y',
+            position: 'nearest',
+      },
     }
   });
 
@@ -127,35 +135,30 @@ function getDatasetsTemplate() {
           label: "私生活",
           borderColor: "rgba(249, 71, 66, 1)",
           backgroundColor: "rgba(249, 71, 66, 0.2)",
-          spanGaps: true,
           data: [],
         },
       q2 : {
           label: "学校生活",
           borderColor: "rgba(52, 151, 254, 1)",
           backgroundColor: "rgba(52, 151, 254, 0.2)",
-          spanGaps: true,
           data: [],
         },
       q3 : {
           label: "人間関係",
           borderColor: "rgba(245, 249, 66, 1)",
           backgroundColor: "rgba(245, 249, 66, 0.2)",
-          spanGaps: true,
           data: [],
         },
       q4 : {
           label: "体調",
           borderColor: "rgba(66, 148, 67, 1)",
           backgroundColor: "rgba(66, 148, 67, 0.2)",
-          spanGaps: true,
           data: [],
         },
       q5 : {
           label: "プライズ",
           borderColor: "rgba(249, 176, 66, 1)",
           backgroundColor: "rgba(249, 176, 66, 0.2)",
-          spanGaps: true,
           data: [],
         },
     };
