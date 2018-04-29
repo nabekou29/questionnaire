@@ -3,6 +3,10 @@ $(function () {
 
   $("input[name='name']").val($.cookie("name"));
 
+  $(document).on('keypress', 'input:not(.allow_submit)', function (event) {
+    return event.which !== 13;
+  });
+
   $("button.start").one('click', function () {
     // 名前をクッキーに保存
     let name = $("input[name='name']").val();
@@ -52,6 +56,9 @@ function showNextForm(indexNo) {
   });
 }
 
+/**
+ * フォームの値をJSON形式に変化する
+ */
 function createJson() {
   let data = {
     name: $("[name='name']").val(),
