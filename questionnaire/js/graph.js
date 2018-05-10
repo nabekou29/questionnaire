@@ -12,17 +12,16 @@ $(function() {
   });
 
   // 日付のデフォルト値を設定
-  let dateFormat = new DateFormat("yyyy-MM-dd");
-  let setDate = new Date();
-  $("#to").val(dateFormat.format(setDate));
-  setDate.setDate(setDate.getDate() - 7);
-  $("#from").val(dateFormat.format(setDate));
+  let setDate = moment()
+  const format = "YYYY-MM-DD"
+  $("#to").val(setDate.format(format));
+  $("#from").val(moment().subtract(7, "days").format(format));
 
   // グラフ生成のイベント登録
   $("#names, #to, #from").on('change', function() {
     let name = $("#names").val();
-    let from = dateFormat.parse($("#from").val());
-    let to = dateFormat.parse($("#to").val());
+    let from = moment($("#from").val(), format);
+    let to = moment($("#to").val(), format);
     if (name) {
       drawGraph(name, from, to);
     }
@@ -50,8 +49,8 @@ function drawGraph(name, from, to) {
     }
   });
 
-  let dateFormat = new DateFormat("M/dd");
-  $("#graph-title").html(`${name}さんの${dateFormat.format(from)} 〜 ${dateFormat.format(to)}の心情変化`);
+  const format = "M/DD"
+  $("#graph-title").html(`${name}さんの${from.format(format)} 〜 ${to.format(format)}の心情変化`);
 }
 
 /**
@@ -63,15 +62,16 @@ function createGraphData(name, from, to) {
   let dataSetsTmp = getDatasetsTemplate();
 
   let dataIndex = 0;
-  let targetDate = new Date(from.getTime());
+  let targetDate = moment(from.toDate());
   while (answers[dataIndex] < to) {
     dataIndex++;
   }
-  let dateFormat = new DateFormat("M/dd");
-  for (; targetDate.getTime() <= to.getTime(); targetDate.setDate(targetDate.getDate() + 1)) {
-    labels.push(dateFormat.format(targetDate));
+
+  const format = "M/DD"
+  for (; targetDate.diff(to) <= 0; targetDate = targetDate.add(1, "days")) {
+    labels.push(targetDate.format(format));
     let answer;
-    if (dataIndex < answers.length && answers[dataIndex].date.getTime() == targetDate.getTime()) {
+    if (dataIndex < answers.length && targetDate.diff(moment(answers[dataIndex].date)) == 0) {
       answer = answers[dataIndex];
       dataIndex++;
     } else {
