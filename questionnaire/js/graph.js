@@ -11,11 +11,11 @@ $(function() {
     namesSelect.appendChild(option);
   });
 
+  const format = "YYYY-MM-DD"
   // 日付のデフォルト値を設定
   let setDate = moment()
-  const format = "YYYY-MM-DD"
   $("#to").val(setDate.format(format));
-  $("#from").val(moment().subtract(7, "days").format(format));
+  $("#from").val(setDate.subtract(7, "days").format(format));
 
   // グラフ生成のイベント登録
   $("#names, #to, #from").on('change', function() {
@@ -32,7 +32,12 @@ $(function() {
  * グラフの描画
  */
 function drawGraph(name, from, to) {
-  let ctx = document.getElementById("lineChart").getContext('2d');
+  $("#lineChart").remove();
+  $("<canvas>", {
+    id: 'lineChart',
+  }).appendTo("div.lineChart");
+
+  let ctx = $("#lineChart")[0].getContext('2d');
   ctx.clearRect(0, 0, ctx.width, ctx.height);
   let lineChart = new Chart(ctx, {
     type: 'line',
@@ -49,7 +54,7 @@ function drawGraph(name, from, to) {
     }
   });
 
-  const format = "M/DD"
+  const format = "M/D"
   $("#graph-title").html(`${name}さんの${from.format(format)} 〜 ${to.format(format)}の心情変化`);
 }
 
@@ -63,11 +68,15 @@ function createGraphData(name, from, to) {
 
   let dataIndex = 0;
   let targetDate = moment(from.toDate());
-  while (answers[dataIndex] < to) {
-    dataIndex++;
+  while (moment(answers[dataIndex].date).diff(from) < 0) {
+    dataIndex += 1;
+    console.log(dataIndex, answers.length);
+    if (dataIndex >= answers.length) {
+      break;
+    }
   }
 
-  const format = "M/DD"
+  const format = "M/D"
   for (; targetDate.diff(to) <= 0; targetDate = targetDate.add(1, "days")) {
     labels.push(targetDate.format(format));
     let answer;
