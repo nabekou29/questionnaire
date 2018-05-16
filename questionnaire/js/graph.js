@@ -1,6 +1,11 @@
+var allAnswers = [];
+var comments = [];
+
 $(function() {
   // chart.jsの設定
   Chart.defaults.line.spanGaps = true;
+
+  allAnswers = getCSV();
 
   // 名前一覧のセレクトボックス生成
   let namesSelect = document.getElementById("names");
@@ -26,7 +31,48 @@ $(function() {
       drawGraph(name, from, to);
     }
   });
+
 });
+
+//CSVファイルを読み込む関数getCSV()の定義
+function getCSV(){
+  let req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
+  req.open("get", "csv/nippo.csv", false); // アクセスするファイルを指定
+  req.send(null); // HTTPリクエストの発行
+
+  let arr = convertCSVtoArray(req.responseText); // 渡されるのは読み込んだCSVデータ
+  let answers = [];
+  arr.forEach(function(e, i) {
+    answers.push({
+        date: new Date(e[0]),
+        id: e[1],
+        name: e[2],
+        q1: e[3],
+        q2: e[4],
+        q3: e[5],
+        q4: e[6],
+        q5: e[7],
+        comment: e[8],
+      });
+  });
+
+  return answers;
+}
+
+function convertCSVtoArray(str){
+  let result = []; // 最終的な二次元配列を入れるための配列
+  let tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
+  let cnt = 0;
+  for(var i=1;　i　<　tmp.length - 1;　i++){
+    result[i - cnt] = tmp[i].split(',');
+    if (result[i - cnt].length === 1) {
+      result[i - cnt - 1][8] += "\n" + result[i - cnt][0];
+      result[i - cnt - 1][8] = result[i - cnt - 1][8].replace(/\"/g, "")
+      cnt += 1;
+    }
+  }
+  return result;
+}
 
 /**
  * グラフの描画
@@ -50,6 +96,10 @@ function drawGraph(name, from, to) {
             mode: 'index',
             axis: 'y',
             position: 'nearest',
+            callbacks: {
+              footer: (tooltipItems, data) => ['<ひとこと>'].concat(comments[tooltipItems[0].index].split("\n")),
+            },
+            footerMarginTop: 14,
       },
     }
   });
@@ -70,12 +120,11 @@ function createGraphData(name, from, to) {
   let targetDate = moment(from.toDate());
   while (moment(answers[dataIndex].date).diff(from) < 0) {
     dataIndex += 1;
-    console.log(dataIndex, answers.length);
     if (dataIndex >= answers.length) {
       break;
     }
   }
-
+  comments = [];
   const format = "M/D"
   for (; targetDate.diff(to) <= 0; targetDate = targetDate.add(1, "days")) {
     labels.push(targetDate.format(format));
@@ -84,13 +133,14 @@ function createGraphData(name, from, to) {
       answer = answers[dataIndex];
       dataIndex++;
     } else {
-      answer = {q1: null, q2: null, q3: null, q4: null, q5: null};
+      answer = {q1: null, q2: null, q3: null, q4: null, q5: null, comment: ""};
     }
     dataSetsTmp.q1.data.push(answer.q1);
     dataSetsTmp.q2.data.push(answer.q2);
     dataSetsTmp.q3.data.push(answer.q3);
     dataSetsTmp.q4.data.push(answer.q4);
     dataSetsTmp.q5.data.push(answer.q5);
+    comments.push(answer.comment);
   }
 
   let dataSets = [dataSetsTmp.q1, dataSetsTmp.q2, dataSetsTmp.q3, dataSetsTmp.q4, dataSetsTmp.q5];
@@ -101,41 +151,14 @@ function createGraphData(name, from, to) {
  * 名前から回答を取得
  */
 function getAnswersByName(name) {
-  // TODO: 作成
-  let answers = [];
-  answers[0] = {
-      date: new Date(2018, 3, 20),
-      q1: 3,
-      q2: 2,
-      q3: 2,
-      q4: 4,
-      q5: 5,
-    };
-  answers[1] = {
-      date: new Date(2018, 3, 21),
-      q1: 1,
-      q2: 5,
-      q3: 1,
-      q4: 4,
-      q5: 4,
-    };
-  answers[2] = {
-      date: new Date(2018, 3, 23),
-      q1: 2,
-      q2: 5,
-      q3: 5,
-      q4: 4,
-      q5: 3,
-    };
-  return answers;
+  return allAnswers.filter(o => o.name === name).sort(o => o.date).reverse();
 }
 
 /**
  * 名前の一覧を取得
  */
 function getAllNames() {
-  // TODO: 作成
-  return ["hoge", "hoge2", "hoge3"];
+  return allAnswers.map(o => o.name).filter(name => name).filter((x, i, self) => self.indexOf(x) === i).sort();
 }
 
 function getDatasetsTemplate() {
