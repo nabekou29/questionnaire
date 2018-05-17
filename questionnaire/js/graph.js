@@ -4,7 +4,6 @@ var comments = [];
 $(function() {
   // chart.jsの設定
   Chart.defaults.line.spanGaps = true;
-
   allAnswers = getCSV();
 
   // 名前一覧のセレクトボックス生成
@@ -162,36 +161,42 @@ function getAllNames() {
 }
 
 function getDatasetsTemplate() {
+  const lineTension = 0.2;
   return {
       q1 : {
           label: "私生活",
           borderColor: "rgba(249, 71, 66, 1)",
           backgroundColor: "rgba(249, 71, 66, 0.2)",
           data: [],
+          lineTension: lineTension,
         },
       q2 : {
           label: "学校生活",
           borderColor: "rgba(52, 151, 254, 1)",
           backgroundColor: "rgba(52, 151, 254, 0.2)",
           data: [],
+          lineTension: lineTension,
         },
       q3 : {
           label: "人間関係",
           borderColor: "rgba(245, 249, 66, 1)",
           backgroundColor: "rgba(245, 249, 66, 0.2)",
           data: [],
+          lineTension: lineTension,
         },
       q4 : {
           label: "体調",
           borderColor: "rgba(66, 148, 67, 1)",
           backgroundColor: "rgba(66, 148, 67, 0.2)",
           data: [],
+          lineTension: lineTension,
         },
       q5 : {
           label: "プライズ",
           borderColor: "rgba(249, 176, 66, 1)",
           backgroundColor: "rgba(249, 176, 66, 0.2)",
           data: [],
+          lineTension: lineTension,
         },
     };
 }
