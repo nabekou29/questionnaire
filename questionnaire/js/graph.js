@@ -1,14 +1,11 @@
-var allAnswers = [];
-var comments = [];
-
 $(function() {
   // chart.jsの設定
   Chart.defaults.line.spanGaps = true;
-  allAnswers = getCSV();
+  let allAnswers = getCSV();
 
   // 名前一覧のセレクトボックス生成
   let namesSelect = document.getElementById("names");
-  getAllNames().forEach(function(name) {
+  getAllNames(allAnswers).forEach(function(name) {
     let option = document.createElement("option");
     option.value = name;
     option.innerText = name;
@@ -27,7 +24,8 @@ $(function() {
     let from = moment($("#from").val(), format);
     let to = moment($("#to").val(), format);
     if (name) {
-      drawGraph(name, from, to);
+      drawGraph(name, from, to, allAnswers);
+      displayComment(name, from, to, allAnswers);
     }
   });
 
@@ -76,7 +74,7 @@ function convertCSVtoArray(str){
 /**
  * グラフの描画
  */
-function drawGraph(name, from, to) {
+function drawGraph(name, from, to, allAnswers) {
   $("#lineChart").remove();
   $("<canvas>", {
     id: 'lineChart',
@@ -84,9 +82,14 @@ function drawGraph(name, from, to) {
 
   let ctx = $("#lineChart")[0].getContext('2d');
   ctx.clearRect(0, 0, ctx.width, ctx.height);
+
+  let data = [];
+  let comments = [];
+  [data, comments] = createGraphData(name, from, to, allAnswers);
+
   let lineChart = new Chart(ctx, {
     type: 'line',
-    data: createGraphData(name, from, to),
+    data: data,
     options: {
       scales: {
         yAxes: [{ticks: {min: 1, max: 5}}]
@@ -96,7 +99,7 @@ function drawGraph(name, from, to) {
             axis: 'y',
             position: 'nearest',
             callbacks: {
-              footer: (tooltipItems, data) => ['<ひとこと>'].concat(comments[tooltipItems[0].index].split("\n")),
+              footer: (tooltipItems, data) => ['<ひとこと>'].concat(comments[tooltipItems[0].index].comment.split("\n")),
             },
             footerMarginTop: 14,
       },
@@ -104,17 +107,52 @@ function drawGraph(name, from, to) {
   });
 
   const format = "M/D"
-  $("#graph-title").html(`${name}さんの${from.format(format)} 〜 ${to.format(format)}の心情変化`);
+  $("#graph-title").html(`${name}さんの${from.format(format)} 〜 ${to.format(format)}の様子`);
 }
 
 /**
  * グラフ用のデータ作成
  */
-function createGraphData(name, from, to) {
-  let answers = getAnswersByName(name);
+function createGraphData(name, from, to, allAnswers) {
+  let answers = trimAnswer(name, from, to, allAnswers);
   let labels = [];
+  let comments = [];
   let dataSetsTmp = getDatasetsTemplate();
 
+  const format = "M/D";
+  answers.forEach(function(answer) {
+    console.log(answer.date);
+    labels.push(answer.date.format(format));
+    dataSetsTmp.q1.data.push(answer.q1);
+    dataSetsTmp.q2.data.push(answer.q2);
+    dataSetsTmp.q3.data.push(answer.q3);
+    dataSetsTmp.q4.data.push(answer.q4);
+    dataSetsTmp.q5.data.push(answer.q5);
+    comments.push({comment: answer.comment, date: moment(answer.date.toDate())});
+  });
+
+  let dataSets = [dataSetsTmp.q1, dataSetsTmp.q2, dataSetsTmp.q3, dataSetsTmp.q4, dataSetsTmp.q5];
+  return [{labels: labels, datasets: dataSets}, comments];
+}
+
+function displayComment(name, from, to, allAnswers) {
+  let answers = trimAnswer(name, from, to, allAnswers);
+  $('#comments').html("");
+  $('#comments').append(`<tr><th>日付</th><th>私</th><th>学</th><th>人</th><th>体</th><th>プ</th><th>ひとこと</th></tr>`)
+  answers.filter(a => a.comment).forEach(function(e, i) {
+    $('#comments').append(
+        `<tr><td>${e.date.format("YYYY/MM/DD")}</td>`
+        + `<td>${e.q1}</td><td>${e.q2}</td><td>${e.q3}</td><td>${e.q4}</td><td>${e.q5}</td>`
+        + `<td>${e.comment}</td></tr>`)
+  });
+}
+
+/**
+ * 名前と指定された日付の範囲から回答を取得します
+ */
+function trimAnswer(name, from, to, allAnswers) {
+  let answers = getAnswersByName(name, allAnswers);
+  let tmpAnswers = [];
   let dataIndex = 0;
   let targetDate = moment(from.toDate());
   while (moment(answers[dataIndex].date).diff(from) < 0) {
@@ -123,41 +161,49 @@ function createGraphData(name, from, to) {
       break;
     }
   }
-  comments = [];
-  const format = "M/D"
   for (; targetDate.diff(to) <= 0; targetDate = targetDate.add(1, "days")) {
-    labels.push(targetDate.format(format));
     let answer;
     if (dataIndex < answers.length && targetDate.diff(moment(answers[dataIndex].date)) == 0) {
-      answer = answers[dataIndex];
+      answer = Object.assign(answers[dataIndex]);
+      // Date -> moment
+      answer.date = moment(answer.date);
       dataIndex++;
     } else {
-      answer = {q1: null, q2: null, q3: null, q4: null, q5: null, comment: ""};
+      answer = {...emptyAnswer(), date: moment(targetDate.toDate()),};
     }
-    dataSetsTmp.q1.data.push(answer.q1);
-    dataSetsTmp.q2.data.push(answer.q2);
-    dataSetsTmp.q3.data.push(answer.q3);
-    dataSetsTmp.q4.data.push(answer.q4);
-    dataSetsTmp.q5.data.push(answer.q5);
-    comments.push(answer.comment);
+    tmpAnswers.push(answer);
   }
-
-  let dataSets = [dataSetsTmp.q1, dataSetsTmp.q2, dataSetsTmp.q3, dataSetsTmp.q4, dataSetsTmp.q5];
-  return {labels: labels, datasets: dataSets};
+  return tmpAnswers;
 }
 
 /**
  * 名前から回答を取得
  */
-function getAnswersByName(name) {
+function getAnswersByName(name, allAnswers) {
   return allAnswers.filter(o => o.name === name).sort(o => o.date).reverse();
 }
 
 /**
  * 名前の一覧を取得
  */
-function getAllNames() {
+function getAllNames(allAnswers) {
   return allAnswers.map(o => o.name).filter(name => name).filter((x, i, self) => self.indexOf(x) === i).sort();
+}
+
+/**
+ * 空の回答を作成
+ */
+function emptyAnswer() {
+  return {date: null,
+      id: "",
+      name: "",
+      q1: null,
+      q2: null,
+      q3: null,
+      q4: null,
+      q5: null,
+      comment: "",
+    };
 }
 
 function getDatasetsTemplate() {
