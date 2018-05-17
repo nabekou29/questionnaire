@@ -39,7 +39,9 @@ $(function() {
 
 });
 
-//CSVファイルを読み込む関数getCSV()の定義
+/**
+ * CSVをオブジェクトの配列として取得
+ */
 function getCSV(){
   let req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
   req.open("get", "csv/nippo.csv", false); // アクセスするファイルを指定
@@ -64,6 +66,9 @@ function getCSV(){
   return answers;
 }
 
+/**
+ * CSVを２次元配列として取得
+ */
 function convertCSVtoArray(str){
   let result = []; // 最終的な二次元配列を入れるための配列
   let tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
@@ -89,7 +94,6 @@ function drawGraph(name, from, to, allAnswers) {
   }).appendTo("div.lineChart");
 
   let ctx = $("#lineChart")[0].getContext('2d');
-  ctx.clearRect(0, 0, ctx.width, ctx.height);
 
   let data = [];
   let comments = [];
@@ -143,6 +147,9 @@ function createGraphData(name, from, to, allAnswers) {
   return [{labels: labels, datasets: dataSets}, comments];
 }
 
+/**
+ * ひとこと一覧テーブルを作成
+ */
 function displayComment(name, from, to, allAnswers) {
   let answers = trimAnswer(name, from, to, allAnswers);
   $('#comments').html("");
@@ -156,7 +163,7 @@ function displayComment(name, from, to, allAnswers) {
             .join("</td><td>")
         + "</td>"
         // + `<td>${e.q1}</td><td>${e.q2}</td><td>${e.q3}</td><td>${e.q4}</td><td>${e.q5}</td>`
-        + `<td>${e.comment}</td></tr>`)
+        + `<td>${e.comment.replace(/\n/g, "<br>")}</td></tr>`)
   });
 }
 
@@ -219,6 +226,9 @@ function emptyAnswer() {
     };
 }
 
+/**
+ * グラフのデータセットのテンプレートを取得
+ */
 function getDatasetsTemplate() {
   const lineTension = 0.2;
   return {
