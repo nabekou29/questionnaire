@@ -1,3 +1,11 @@
+const images = {
+  "5": "img/mark_tenki_hare.png",
+  "4": "img/mark_tenki_hare_kumori.png",
+  "3": "img/mark_tenki_kumori.png",
+  "2": "img/mark_tenki_kumori_ame.png",
+  "1": "img/mark_tenki_umbrella.png",
+};
+
 $(function() {
   // chart.jsの設定
   Chart.defaults.line.spanGaps = true;
@@ -142,7 +150,12 @@ function displayComment(name, from, to, allAnswers) {
   answers.filter(a => a.comment).forEach(function(e, i) {
     $('#comments').append(
         `<tr><td>${e.date.format("YYYY/MM/DD")}</td>`
-        + `<td>${e.q1}</td><td>${e.q2}</td><td>${e.q3}</td><td>${e.q4}</td><td>${e.q5}</td>`
+        + "<td>"
+        + [e.q1, e.q2, e.q3, e.q4, e.q5]
+            .map(q => `<img src=./${images[q]} width="20" height="20">`)
+            .join("</td><td>")
+        + "</td>"
+        // + `<td>${e.q1}</td><td>${e.q2}</td><td>${e.q3}</td><td>${e.q4}</td><td>${e.q5}</td>`
         + `<td>${e.comment}</td></tr>`)
   });
 }
